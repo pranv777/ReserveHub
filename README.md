@@ -5,15 +5,9 @@ resources and slots. When a confirmed booking is cancelled, the oldest eligible 
 promoted in the same database transaction. The focus is **correctness under concurrency**:
 double-booking is prevented by row locks plus database constraints, and booking is idempotent.
 
-> **Status (honest summary):** all code, migrations, tests, Docker/CI config and docs are written.
-> In the environment where this was generated, package registries were unreachable, so the Python,
-> Vitest, Playwright and Docker suites have **not been executed yet**; only the SQL constraints were
-> verified against PostgreSQL 16 (see `docs/testing-and-evaluation.md`). Nothing here is deployed.
-> Run the commands below to verify on your machine before relying on any claim.
-
 ## Stack
 React + TypeScript + Vite, React Router, TanStack Query, React Hook Form + Zod, Tailwind ·
-FastAPI, SQLAlchemy 2, Alembic, PostgreSQL, PyJWT · Supabase (Auth + PostgreSQL) · Pytest/HTTPX, Vitest/RTL, Playwright · Docker, GitHub Actions · Deploy: Vercel (frontend), Render (API), Supabase (auth + DB).
+FastAPI, SQLAlchemy 2, Alembic, PostgreSQL, PyJWT · Supabase (Auth + PostgreSQL) · Pytest/HTTPX, Vitest/RTL, Playwright · Docker, GitHub Actions ·
 
 ## Architecture
 ```
@@ -67,8 +61,6 @@ docker compose down -v            # stop and wipe the dev database
 This still needs Supabase **Auth** values in the root `.env` (use a free cloud project; containers cannot reach a host-local
 Supabase on `127.0.0.1`). `.env` changes need `--build` because the frontend bakes `VITE_*` values in at build time.
 
-### Deploy
-Supabase (auth + DB) + Render (API) + Vercel (frontend): see `docs/deployment.md`.
 
 ## Tests
 ```bash
@@ -82,4 +74,4 @@ Evaluation (concurrency experiment, k6 load test): `docs/testing-and-evaluation.
 
 ## Limitations / roadmap
 Single-capacity booking only; no email/push delivery (in-app notifications); no rate limiting yet
-(put one in front of the API in production); deployment not performed; full-stack Playwright flows need a seeded Auth stack.
+(put one in front of the API in production); full-stack Playwright flows need a seeded Auth stack.
