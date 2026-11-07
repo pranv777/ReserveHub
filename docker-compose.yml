@@ -1,0 +1,52 @@
+# OPTIONAL fallback: runs the whole stack with a plain Postgres container and no Supabase DB.
+# You still need Supabase Auth values in .env (local `npx supabase start` works; the api container
+# then cannot reach 127.0.0.1, so prefer running api/frontend on the host in that mode).
+services:
+  db:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-reservehub}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-reservehub}
+      POSTGRES_DB: ${POSTGRES_DB:-reservehub}
+    ports: ["5432:5432"]
+    volumes: [reservehub-pgdata:/var/lib/postgresql/data]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-reservehub} -d ${POSTGRES_DB:-reservehub}"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  migrate:
+    build: ./backend
+    command: ["alembic", "upgrade", "head"]
+    environment: &backend-env
+      DATABASE_URL: postgresql+psycopg://${POSTGRES_USER:-reservehub}:${POSTGRES_PASSWORD:-reservehub}@db:5432/${POSTGRES_DB:-reservehub}
+      CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:5173}
+      SUPABASE_JWKS_URL: ${SUPABASE_JWKS_URL:-}
+      SUPABASE_JWT_SECRET: ${SUPABASE_JWT_SECRET:-}
+      JWT_AUDIENCE: ${JWT_AUDIENCE:-authenticated}
+      JWT_ISSUER: ${JWT_ISSUER:-}
+      LOG_LEVEL: ${LOG_LEVEL:-INFO}
+    depends_on:
+      db: { condition: service_healthy }
+
+  api:
+    build: ./backend
+    environment: *backend-env
+    ports: ["8000:8000"]
+    depends_on:
+      migrate: { condition: service_completed_successfully }
+
+  frontend:
+    build:
+      context: ./frontend
+      args:
+        VITE_API_BASE_URL: ${VITE_API_BASE_URL:-http://localhost:8000}
+        VITE_SUPABASE_URL: ${VITE_SUPABASE_URL:-}
+        VITE_SUPABASE_ANON_KEY: ${VITE_SUPABASE_ANON_KEY:-}
+    ports: ["5173:80"]
+    depends_on: [api]
+
+volumes:
+  reservehub-pgdata:
+# Reset the dev database (DESTROYS local data):  docker compose down -v

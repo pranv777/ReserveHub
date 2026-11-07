@@ -1,0 +1,30 @@
+# Render Blueprint for the API. Frontend -> Vercel, auth + database -> Supabase (see docs/deployment.md).
+services:
+  - type: web
+    name: reservehub-api
+    runtime: docker
+    dockerfilePath: ./backend/Dockerfile
+    dockerContext: ./backend
+    plan: free                       # free instances sleep when idle (cold starts); use a paid plan for production
+    healthCheckPath: /api/v1/health/live
+    # Migrations are applied separately (scripts/migrate_sql.sh, the Supabase SQL editor, or `alembic upgrade head` from your machine).
+    # On paid plans you may instead add:   preDeployCommand: alembic upgrade head
+    envVars:
+      - key: ENVIRONMENT
+        value: production
+      - key: LOG_LEVEL
+        value: INFO
+      - key: DB_POOL_SIZE
+        value: "5"
+      - key: DB_MAX_OVERFLOW
+        value: "5"
+      - key: JWT_AUDIENCE
+        value: authenticated
+      - key: DATABASE_URL            # Supabase pooler connection string (Dashboard > Connect)
+        sync: false
+      - key: CORS_ORIGINS            # e.g. https://reservehub.vercel.app (comma separated, no wildcard)
+        sync: false
+      - key: SUPABASE_JWKS_URL
+        sync: false
+      - key: JWT_ISSUER
+        sync: false

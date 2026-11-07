@@ -1,0 +1,44 @@
+.env
+.env.*
+!.env.example
+
+__pycache__/
+*.pyc
+.venv/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+.coverage
+htmlcov/
+node_modules/
+dist/
+
+playwright-report/
+test-results/
+
+*.log
+supabase/.temp/
+supabase/.branches/
+
+# Coverage reports (you now generate these with npm run test:coverage)
+coverage/
+coverage.xml
+.coverage.*
+
+# Playwright extras
+blob-report/
+playwright/.cache/
+
+# Vercel CLI link folder
+.vercel/
+
+# TypeScript / package manager logs
+*.tsbuildinfo
+npm-debug.log*
+
+# Editor and OS files
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
